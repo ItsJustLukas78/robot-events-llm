@@ -1,12 +1,19 @@
 import os
 
 import yaml
+import torch
 from dotenv import load_dotenv
 from langchain import OpenAI
 from langchain.agents.agent_toolkits import NLAToolkit, OpenAPIToolkit
 from langchain.agents.agent_toolkits.openapi.spec import reduce_openapi_spec
 from langchain.chains import APIChain, LLMChain
-from langchain.llms import GPT4All, OpenAI, OpenAIChat
+from langchain.chat_models import ChatOpenAI
+from langchain.llms import GPT4All, OpenAI
+from langchain.memory import (
+    CombinedMemory,
+    ConversationKGMemory,
+    ConversationTokenBufferMemory,
+)
 from langchain.requests import Requests, RequestsWrapper
 from langchain.schema import AgentAction, AgentFinish
 from transformers import pipeline
@@ -23,13 +30,24 @@ from langchain.agents.agent_toolkits.openapi import planner
 #     return_full_text=True,
 # )
 
-# openai_llm = OpenAIChat(temperature=0.0, model_name="gpt-3.5-turbo", verbose=True)
-gpt4all_model = GPT4All(
-    model="./models/ggml-gpt4all-j-v1.3-groovy.bin",
-    n_ctx=512,
-    n_threads=8,
-    backend="gptj",
+openai_llm = ChatOpenAI(temperature=0.2, model_name="gpt-3.5-turbo", verbose=True)
+# gpt4all_model = GPT4All(
+#     model="./models/ggml-gpt4all-j-v1.3-groovy.bin",
+#     n_ctx=512,
+#     n_threads=8,
+#     backend="gptj",
+# )
+
+current_llm = openai_llm
+
+token_buffer_memory = ConversationTokenBufferMemory(
+    llm=current_llm, max_token_limit=200, memory_key="token_buffer", input_key="input"
 )
+kg_memory = ConversationKGMemory(
+    llm=current_llm, memory_key="kg_memory", input_key="input"
+)
+
+memory = CombinedMemory(memories=[token_buffer_memory, kg_memory])
 
 headers = {
     "Content-Type": "application/json",
@@ -46,10 +64,21 @@ with open("RE_documentation.yaml") as file:
 robot_events_agent = planner.create_openapi_agent(
     RE_api_spec,
     requests_wrapper,
-    gpt4all_model,
+    current_llm,
+    shared_memory=memory,
     verbose=True,
 )
 
+while True:
+    query = input("\nEnter a query: ")
+    if query == "exit":
+        break
 
-user_input = "My team ID is 93452, can you list the last 3 events we attended?"
-robot_events_agent.run(user_input)
+    # Get the answer from the chain
+    res = robot_events_agent.run(query)
+
+    # Print the result
+    print("\n\n> Question:")
+    print(query)
+    print("\n> Answer:")
+    print(res)
