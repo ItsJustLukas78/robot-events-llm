@@ -1,95 +1,106 @@
-openapi: 3.0.0
+openapi: 3.1.0
+info:
+  title: Public Robot Events API
+  version: 1.0.21
+  description: |
+    An API to access data on Robot Events officially.
+    ## Request Metadata
+    Pagination is performed the same way throughout each pageable endpoint using the query parameters `page` and `per_page`.
+    Please not that dates should be formatted according to RFC3339.
+servers:
+  - url: 'https://www.robotevents.com/api/v2'
 paths:
   /events:
     get:
+      operationId: event_getEvents
       description: Gets a List of Events
-      tags:
-        - Event
-      operationId: 'event_getEvents'
-      responses:
-        "200":
-          description: List of Events
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedEvent"
       parameters:
-        - name: id[]
-          description: The Event ID
+        - name: 'id[]'
           in: query
+          description: The Event ID
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [26828, 34509, 29916]
-        - name: sku[]
-          description: The Event SKU
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 26828
+                - 34509
+                - 29916
           explode: true
+          style: form
+        - name: 'sku[]'
+          in: query
+          description: The Event SKU
+          required: false
           schema:
             type: array
             items:
               type: string
-            example: [RE-VRC-18-1234, RE-VRC-18-5678]
-        - name: team[]
+            examples:
+              - - RE-VRC-18-1234
+                - RE-VRC-18-5678
+          explode: true
+          style: form
+        - name: 'team[]'
+          in: query
           description: Teams that participated in the Event
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [151461, 67381]
-        - name: season[]
+            examples:
+              - - 151461
+                - 67381
+          explode: true
+          style: form
+        - name: 'season[]'
+          in: query
           description: The Season that the Event belonged to
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [173, 102]
-        - name: start
-          description: The Start Date of the Event
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date-time
-            example: 2018-10-01T00:00:00.000Z
-        - name: end
-          description: The End Date of the Event
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date-time
-            example: 2018-10-01T00:00:00.000Z
-        - name: region
-          description: The region of the event
-          in: query
-          required: false
-          schema:
-            type: string
-            example: California
-        - name: level[]
-          description: The Event Level
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 173
+                - 102
           explode: true
+          style: form
+        - name: start
+          in: query
+          description: The Start Date of the Event
+          required: false
+          schema:
+            type: string
+            format: date-time
+            examples:
+              - '2018-10-01T00:00:00.000Z'
+        - name: end
+          in: query
+          description: The End Date of the Event
+          required: false
+          schema:
+            type: string
+            format: date-time
+            examples:
+              - '2018-10-01T00:00:00.000Z'
+        - name: region
+          in: query
+          description: The region of the event
+          required: false
+          schema:
+            type: string
+            examples:
+              - California
+        - name: 'level[]'
+          in: query
+          description: The Event Level
+          required: false
           schema:
             type: array
             items:
@@ -100,96 +111,104 @@ paths:
                 - State
                 - Signature
                 - Other
+          explode: true
+          style: form
         - name: myEvents
-          description: Only show events that have at least one registered team associated with the authenticated user.
           in: query
+          description: Only show events that have at least one registered team associated with the authenticated user.
           required: false
           schema:
             type: boolean
             default: false
-        - name: eventTypes[]
-          description: The Event Type
+        - name: 'eventTypes[]'
           in: query
+          description: The Event Type
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/EventType"
-  "/events/{id}":
-    get:
-      description: Gets a Single Event
+              $ref: '#/components/schemas/EventType'
+          explode: true
+          style: form
+      responses:
+        '200':
+          description: List of Events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEvent'
       tags:
         - Event
-      operationId: 'event_getEvent'
+  '/events/{id}':
+    get:
+      operationId: event_getEvent
+      description: Gets a Single Event
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Event
+          required: true
+          schema:
+            type: integer
+            format: int32
+            examples:
+              - 26828
       responses:
-        "200":
+        '200':
           description: A single Event
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Event"
-        "404":
+                $ref: '#/components/schemas/Event'
+        '404':
           description: Specified Event not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-      parameters:
-        - name: id
-          description: The ID of the Event
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 26828
-  "/events/{id}/teams":
-    get:
-      description: Gets a List of Teams present at a given Event
+                $ref: '#/components/schemas/Error'
       tags:
         - Event
-      operationId: 'event_getTeams'
-      responses:
-        "200":
-          description: List of Teams
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedTeam"
+  '/events/{id}/teams':
+    get:
+      operationId: event_getTeams
+      description: Gets a List of Teams present at a given Event
       parameters:
         - name: id
-          description: The ID of the Event
           in: path
+          description: The ID of the Event
           required: true
           schema:
             type: integer
             format: int32
-            example: 25776
-        - name: number[]
-          description: Team Number
+            examples:
+              - 25776
+        - name: 'number[]'
           in: query
+          description: Team Number
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: string
-            example: [5327S, 5327K, 5327X, 80001B, 606X, 1408F]
+            examples:
+              - - 5327S
+                - 5327K
+                - 5327X
+                - 80001B
+                - 606X
+                - 1408F
+          explode: true
+          style: form
         - name: registered
-          description: Whether the Team is Registered
           in: query
+          description: Whether the Team is Registered
           required: false
           schema:
             type: boolean
-        - name: grade[]
-          description: The Grade of the Team
+        - name: 'grade[]'
           in: query
+          description: The Grade of the Team
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
@@ -199,63 +218,67 @@ paths:
                 - High School
                 - Middle School
                 - Elementary School
-        - name: country[]
-          description: The Country of the Team
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'country[]'
+          in: query
+          description: The Country of the Team
+          required: false
           schema:
             type: array
             items:
               type: string
-            example: [United States, Canada, China]
+            examples:
+              - - United States
+                - Canada
+                - China
+          explode: true
+          style: form
         - name: myTeams
-          description: Only show teams associated with the authenticated user.
           in: query
+          description: Only show teams associated with the authenticated user.
           required: false
           schema:
             type: boolean
             default: false
-  "/events/{id}/skills":
-    get:
-      description: Gets a List of Skills runs performed at a given Event
-      tags:
-        - Event
-      operationId: 'event_getSkills'
       responses:
-        "200":
-          description: A list of Skills
+        '200':
+          description: List of Teams
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedSkill"
+                $ref: '#/components/schemas/PaginatedTeam'
+      tags:
+        - Event
+  '/events/{id}/skills':
+    get:
+      operationId: event_getSkills
+      description: Gets a List of Skills runs performed at a given Event
       parameters:
         - name: id
-          description: The ID of the Event
           in: path
+          description: The ID of the Event
           required: true
           schema:
             type: integer
             format: int32
-            example: 25776
-        - name: team[]
-          description: Team Number that performed the Skills run
+            examples:
+              - 25776
+        - name: 'team[]'
           in: query
+          description: Team Number that performed the Skills run
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-        - name: type[]
-          description: Type of Skills run
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'type[]'
+          in: query
+          description: Type of Skills run
+          required: false
           schema:
             type: array
             items:
@@ -263,93 +286,105 @@ paths:
               enum:
                 - driver
                 - programming
-  "/events/{id}/awards":
-    get:
-      description: Gets a List of Awards at a given Event
-      tags:
-        - Event
-      operationId: 'event_getAwards'
+          explode: true
+          style: form
       responses:
-        "200":
-          description: A list of Awards
+        '200':
+          description: A list of Skills
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedAward"
+                $ref: '#/components/schemas/PaginatedSkill'
+      tags:
+        - Event
+  '/events/{id}/awards':
+    get:
+      operationId: event_getAwards
+      description: Gets a List of Awards at a given Event
       parameters:
         - name: id
-          description: The ID of the Event
           in: path
+          description: The ID of the Event
           required: true
           schema:
             type: integer
             format: int32
-            example: 25776
-        - name: team[]
-          description: Team ID that the Award was awarded to
+            examples:
+              - 25776
+        - name: 'team[]'
           in: query
+          description: Team ID that the Award was awarded to
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [93452, 151461, 151462]
-        - name: winner[]
-          description: The Winner of the Award (can include people's names, etc.)
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 93452
+                - 151461
+                - 151462
           explode: true
+          style: form
+        - name: 'winner[]'
+          in: query
+          description: 'The Winner of the Award (can include people''s names, etc.)'
+          required: false
           schema:
             type: array
             items:
               type: string
-  "/events/{id}/divisions/{div}/matches":
-    get:
-      description: Gets a List of Matches for a single Division of an Event
-      operationId: 'event_getDivisionMatches'
-      tags:
-        - Event
+          explode: true
+          style: form
       responses:
-        "200":
-          description: A list of Matches
+        '200':
+          description: A list of Awards
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedMatch"
+                $ref: '#/components/schemas/PaginatedAward'
+      tags:
+        - Event
+  '/events/{id}/divisions/{div}/matches':
+    get:
+      operationId: event_getDivisionMatches
+      description: Gets a List of Matches for a single Division of an Event
       parameters:
         - name: id
+          in: path
           description: The ID of the Event
-          in: path
           required: true
           schema:
             type: integer
             format: int32
-            example: 25776
+            examples:
+              - 25776
         - name: div
-          description: The ID of the Division
           in: path
+          description: The ID of the Division
           required: true
           schema:
             type: integer
             format: int32
-            example: 1
-        - name: team[]
-          description: Only return Matches which involved given Team IDs
+            examples:
+              - 1
+        - name: 'team[]'
           in: query
+          description: Only return Matches which involved given Team IDs
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [93452, 151461, 151462]
-        - name: round[]
+            examples:
+              - - 93452
+                - 151461
+                - 151462
+          explode: true
+          style: form
+        - name: 'round[]'
+          in: query
           description: |
             The Round of the Match.
             Some typical values are shown below:
@@ -360,221 +395,251 @@ paths:
             - 5 - Finals
             - 6 - Round of 16
             - etc.
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-        - name: instance[]
-          description: The Instance of the Match. This is used to describe which
-            Quarter-Final match (for example) is being played
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'instance[]'
+          in: query
+          description: The Instance of the Match. This is used to describe which Quarter-Final match (for example) is being played
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [1, 2, 3]
-        - name: matchnum[]
-          description: The MatchNum of the Match. This is the actual Match
-            "number", e.g. Qualification Match, or the individual match in a
-            Best of 3
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 1
+                - 2
+                - 3
           explode: true
+          style: form
+        - name: 'matchnum[]'
+          in: query
+          description: 'The MatchNum of the Match. This is the actual Match "number", e.g. Qualification Match, or the individual match in a Best of 3'
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [1, 2, 3, 5, 10, 50]
-  "/events/{id}/divisions/{div}/finalistRankings":
-    get:
-      description: Gets a List of Finalist Rankings for a single Division of an Event
-      operationId: 'event_getDivisionFinalistRankings'
+            examples:
+              - - 1
+                - 2
+                - 3
+                - 5
+                - 10
+                - 50
+          explode: true
+          style: form
+      responses:
+        '200':
+          description: A list of Matches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMatch'
       tags:
         - Event
+  '/events/{id}/divisions/{div}/finalistRankings':
+    get:
+      operationId: event_getDivisionFinalistRankings
+      description: Gets a List of Finalist Rankings for a single Division of an Event
       responses:
-        "200":
+        '200':
           description: A list of Rankings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedRanking"
+                $ref: '#/components/schemas/PaginatedRanking'
+      tags:
+        - Event
     parameters:
       - name: id
+        in: path
         description: The ID of the Event
-        in: path
         required: true
         schema:
           type: integer
           format: int32
-          example: 25776
+          examples:
+            - 25776
       - name: div
-        description: The ID of the Division
         in: path
+        description: The ID of the Division
         required: true
         schema:
           type: integer
           format: int32
-          example: 1
-      - name: team[]
+          examples:
+            - 1
+      - name: 'team[]'
+        in: query
         description: Only return Rankings which involve given Team IDs
-        in: query
         required: false
-        style: form
-        explode: true
         schema:
           type: array
           items:
             type: integer
             format: int32
-          example: [93452, 17141, 15172]
-      - name: rank[]
+          examples:
+            - - 93452
+              - 17141
+              - 15172
+        explode: true
+        style: form
+      - name: 'rank[]'
+        in: query
         description: The Rank
-        in: query
         required: false
-        style: form
-        explode: true
         schema:
           type: array
           items:
             type: integer
             format: int32
-
-  "/events/{id}/divisions/{div}/rankings":
+        explode: true
+        style: form
+  '/events/{id}/divisions/{div}/rankings':
     get:
+      operationId: event_getDivisionRankings
       description: Gets a List of Rankings for a single Division of an Event
-      operationId: 'event_getDivisionRankings'
-      tags:
-        - Event
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Event
+          required: true
+          schema:
+            type: integer
+            format: int32
+            examples:
+              - 25776
+        - name: div
+          in: path
+          description: The ID of the Division
+          required: true
+          schema:
+            type: integer
+            format: int32
+            examples:
+              - 1
+        - name: 'team[]'
+          in: query
+          description: Only return Rankings which involve given Team IDs
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 93452
+                - 17141
+                - 15172
+          explode: true
+          style: form
+        - name: 'rank[]'
+          in: query
+          description: The Rank
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+          explode: true
+          style: form
       responses:
-        "200":
+        '200':
           description: A list of Rankings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedRanking"
-      parameters:
-        - name: id
-          description: The ID of the Event
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 25776
-        - name: div
-          description: The ID of the Division
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 1
-        - name: team[]
-          description: Only return Rankings which involve given Team IDs
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [93452, 17141, 15172]
-        - name: rank[]
-          description: The Rank
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
+                $ref: '#/components/schemas/PaginatedRanking'
+      tags:
+        - Event
   /teams:
     get:
+      operationId: team_getTeams
       description: Gets a List of Teams
-      operationId: 'team_getTeams'
-      tags:
-        - Team
-      responses:
-        "200":
-          description: List of Teams
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedTeam"
       parameters:
-        - name: id[]
-          description: Team ID, the primary identifier used internally for a Team in the API, not the name
+        - name: 'id[]'
           in: query
+          description: 'Team ID, the primary identifier used internally for a Team in the API, not the name'
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [93452, 151461, 151462]
-        - name: number[]
-          description: Team Number, the primary identifier for a Team outside of the API
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 93452
+                - 151461
+                - 151462
           explode: true
+          style: form
+        - name: 'number[]'
+          in: query
+          description: 'Team Number, the primary identifier for a Team outside of the API'
+          required: false
           schema:
             type: array
             items:
               type: string
-            example: [5327S, 5327X, 5327Z, 5327V, 80001B, 5327X, 606X, 1408F]
-        - name: event[]
-          description: The Events that Teams have attended
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 5327S
+                - 5327X
+                - 5327Z
+                - 5327V
+                - 80001B
+                - 5327X
+                - 606X
+                - 1408F
           explode: true
+          style: form
+        - name: 'event[]'
+          in: query
+          description: The Events that Teams have attended
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [25776, 33745, 45258]
+            examples:
+              - - 25776
+                - 33745
+                - 45258
+          explode: true
+          style: form
         - name: registered
-          description: Whether or not the Team is Registered
           in: query
+          description: Whether or not the Team is Registered
           required: false
           schema:
             type: boolean
-        - name: program[]
-          description: The Program that the Team is part of
+        - name: 'program[]'
           in: query
+          description: The Program that the Team is part of
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
-            example: [1, 2, 3, 4]
-        - name: grade[]
-          description: The Grade of the Team
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 1
+                - 2
+                - 3
+                - 4
           explode: true
+          style: form
+        - name: 'grade[]'
+          in: query
+          description: The Grade of the Team
+          required: false
           schema:
             type: array
             items:
@@ -584,119 +649,131 @@ paths:
                 - High School
                 - Middle School
                 - Elementary School
-        - name: country[]
-          description: The Country of the Team
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'country[]'
+          in: query
+          description: The Country of the Team
+          required: false
           schema:
             type: array
             items:
               type: string
-            example: [United States, Canada, China]
+            examples:
+              - - United States
+                - Canada
+                - China
+          explode: true
+          style: form
         - name: myTeams
-          description: Only show teams associated with the authenticated user.
           in: query
+          description: Only show teams associated with the authenticated user.
           required: false
           schema:
             type: boolean
             default: false
-  "/teams/{id}":
-    get:
-      description: Gets a Single Team
-      operationId: 'team_getTeam'
+      responses:
+        '200':
+          description: List of Teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTeam'
       tags:
         - Team
+  '/teams/{id}':
+    get:
+      operationId: team_getTeam
+      description: Gets a Single Team
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
+          required: true
+          schema:
+            type: integer
+            format: int32
+            examples:
+              - 93452
       responses:
-        "200":
+        '200':
           description: A single Team
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Team"
-        "404":
+                $ref: '#/components/schemas/Team'
+        '404':
           description: Specified Team not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-      parameters:
-        - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 93452
-  "/teams/{id}/events":
-    get:
-      description: Gets a List of Events that a given Team has attended
-      operationId: 'team_getEvents'
+                $ref: '#/components/schemas/Error'
       tags:
         - Team
-      responses:
-        "200":
-          description: List of Events
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedEvent"
+  '/teams/{id}/events':
+    get:
+      operationId: team_getEvents
+      description: Gets a List of Events that a given Team has attended
       parameters:
         - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
           in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
           required: true
           schema:
             type: integer
             format: int32
-            example: 93452
-        - name: sku[]
-          description: The Event SKU
+            examples:
+              - 93452
+        - name: 'sku[]'
           in: query
+          description: The Event SKU
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: string
-            example: [RE-VRC-18-1234, RE-VRC-18-5678]
-        - name: season[]
-          description: The Season that the Event belonged to
-          in: query
-          required: false
-          style: form
+            examples:
+              - - RE-VRC-18-1234
+                - RE-VRC-18-5678
           explode: true
+          style: form
+        - name: 'season[]'
+          in: query
+          description: The Season that the Event belonged to
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [173, 154, 139]
-        - name: start
-          description: The Start Date of the Event
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date-time
-            example: 2018-04-25T00:00:00.000Z
-        - name: end
-          description: The End Date of the Event
-          in: query
-          required: false
-          schema:
-            type: string
-            format: date-time
-            example: 2018-04-25T00:00:00.000Z
-        - name: level[]
-          description: The Event Level
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 173
+                - 154
+                - 139
           explode: true
+          style: form
+        - name: start
+          in: query
+          description: The Start Date of the Event
+          required: false
+          schema:
+            type: string
+            format: date-time
+            examples:
+              - '2018-04-25T00:00:00.000Z'
+        - name: end
+          in: query
+          description: The End Date of the Event
+          required: false
+          schema:
+            type: string
+            format: date-time
+            examples:
+              - '2018-04-25T00:00:00.000Z'
+        - name: 'level[]'
+          in: query
+          description: The Event Level
+          required: false
           schema:
             type: array
             items:
@@ -707,53 +784,63 @@ paths:
                 - State
                 - Signature
                 - Other
-  "/teams/{id}/matches":
-    get:
-      description: Gets a List of Matches that a given Team has played in
-      operationId: 'team_getMatches'
-      tags:
-        - Team
+          explode: true
+          style: form
       responses:
-        "200":
-          description: List of Matches
+        '200':
+          description: List of Events
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedMatch"
+                $ref: '#/components/schemas/PaginatedEvent'
+      tags:
+        - Team
+  '/teams/{id}/matches':
+    get:
+      operationId: team_getMatches
+      description: Gets a List of Matches that a given Team has played in
       parameters:
         - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
           in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
           required: true
           schema:
             type: integer
             format: int32
-            example: 93452
-        - name: event[]
+            examples:
+              - 93452
+        - name: 'event[]'
+          in: query
           description: The Event the Match was performed at
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [25776, 33745, 45258]
-        - name: season[]
+            examples:
+              - - 25776
+                - 33745
+                - 45258
+          explode: true
+          style: form
+        - name: 'season[]'
+          in: query
           description: The Season during which the Match was played
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [173, 154, 139]
-        - name: round[]
+            examples:
+              - - 173
+                - 154
+                - 139
+          explode: true
+          style: form
+        - name: 'round[]'
+          in: query
           description: |
             The Round of the Match.
             Some typical values are shown below:
@@ -764,140 +851,154 @@ paths:
             - 5 - Finals
             - 6 - Round of 16
             - etc.
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-        - name: instance[]
-          description: The Instance of the Match. This is used to describe which
-            Quarter-Final match (for example) is being played
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'instance[]'
+          in: query
+          description: The Instance of the Match. This is used to describe which Quarter-Final match (for example) is being played
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [1, 2, 3]
-        - name: matchnum[]
-          description: The MatchNum of the Match. This is the actual Match
-            "number", e.g. Qualification Match, or the individual match in a
-            Best of 3
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 1
+                - 2
+                - 3
           explode: true
+          style: form
+        - name: 'matchnum[]'
+          in: query
+          description: 'The MatchNum of the Match. This is the actual Match "number", e.g. Qualification Match, or the individual match in a Best of 3'
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [1, 2, 3]
-  "/teams/{id}/rankings":
-    get:
-      description: Gets a List of Rankings for a given Team
-      operationId: 'team_getRankings'
+            examples:
+              - - 1
+                - 2
+                - 3
+          explode: true
+          style: form
+      responses:
+        '200':
+          description: List of Matches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMatch'
       tags:
         - Team
+  '/teams/{id}/rankings':
+    get:
+      operationId: team_getRankings
+      description: Gets a List of Rankings for a given Team
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
+          required: true
+          schema:
+            type: integer
+            format: int32
+            examples:
+              - 93452
+        - name: 'event[]'
+          in: query
+          description: The Event in which the Ranking was achieved
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 25776
+                - 33745
+                - 45258
+          explode: true
+          style: form
+        - name: 'rank[]'
+          in: query
+          description: The Rank
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 1
+                - 2
+                - 3
+          explode: true
+          style: form
+        - name: 'season[]'
+          in: query
+          description: The Season during which the Ranking was
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 173
+                - 154
+                - 139
+          explode: true
+          style: form
       responses:
-        "200":
+        '200':
           description: List of Rankings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedRanking"
-      parameters:
-        - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 93452
-        - name: event[]
-          description: The Event in which the Ranking was achieved
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [25776, 33745, 45258]
-        - name: rank[]
-          description: The Rank
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [1, 2, 3]
-        - name: season[]
-          description: The Season during which the Ranking was
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [173, 154, 139]
-  "/teams/{id}/skills":
-    get:
-      description: Gets a List of Skills runs that a given Team has performed
-      operationId: 'team_getSkills'
+                $ref: '#/components/schemas/PaginatedRanking'
       tags:
         - Team
-      responses:
-        "200":
-          description: A list of Skills
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedSkill"
+  '/teams/{id}/skills':
+    get:
+      operationId: team_getSkills
+      description: Gets a List of Skills runs that a given Team has performed
       parameters:
         - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
           in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
           required: true
           schema:
             type: integer
             format: int32
-            example: 93452
-        - name: event[]
-          description: The Event at which the Skills run was performed
+            examples:
+              - 93452
+        - name: 'event[]'
           in: query
+          description: The Event at which the Skills run was performed
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [25776, 33745, 45258]
-        - name: type[]
-          description: Type of Skills run
-          in: query
-          required: false
-          style: form
+            examples:
+              - - 25776
+                - 33745
+                - 45258
           explode: true
+          style: form
+        - name: 'type[]'
+          in: query
+          description: Type of Skills run
+          required: false
           schema:
             type: array
             items:
@@ -905,257 +1006,266 @@ paths:
               enum:
                 - driver
                 - programming
-        - name: season[]
-          description: The Season during which the Skills run was performed
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'season[]'
+          in: query
+          description: The Season during which the Skills run was performed
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
-            example: [173, 154, 139]
-  "/teams/{id}/awards":
-    get:
-      description: Gets a List of Awards that a given Team has received
-      operationId: 'team_getAwards'
+            examples:
+              - - 173
+                - 154
+                - 139
+          explode: true
+          style: form
+      responses:
+        '200':
+          description: A list of Skills
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSkill'
       tags:
         - Team
+  '/teams/{id}/awards':
+    get:
+      operationId: team_getAwards
+      description: Gets a List of Awards that a given Team has received
+      parameters:
+        - name: id
+          in: path
+          description: 'The ID of the Team, the primary identifier used internally for a Team in the API, not the name'
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: 'event[]'
+          in: query
+          description: The Event at which the Award was given out
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 25776
+                - 33745
+                - 45258
+          explode: true
+          style: form
+        - name: 'season[]'
+          in: query
+          description: The Season in which the Award was given out
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+            examples:
+              - - 173
+                - 154
+                - 139
+          explode: true
+          style: form
       responses:
-        "200":
+        '200':
           description: List of Awards
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedAward"
-      parameters:
-        - name: id
-          description: The ID of the Team, the primary identifier used internally for a Team in the API, not the name
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-        - name: event[]
-          description: The Event at which the Award was given out
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [25776, 33745, 45258]
-        - name: season[]
-          description: The Season in which the Award was given out
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-            example: [173, 154, 139]
-  /programs/{id}:
-    get:
-      description: Find a single Program by ID
-      operationId: 'program_getProgram'
+                $ref: '#/components/schemas/PaginatedAward'
       tags:
-        - Program
+        - Team
+  '/programs/{id}':
+    get:
+      operationId: program_getProgram
+      description: Find a single Program by ID
       parameters:
         - name: id
-          description: The Program ID
           in: path
+          description: The Program ID
           required: true
           schema:
             type: integer
             format: int32
       responses:
-        "200":
+        '200':
           description: Single Program
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Program"
-  /programs:
-    get:
-      description: Gets a List of Programs
-      operationId: 'program_getPrograms'
+                $ref: '#/components/schemas/Program'
       tags:
         - Program
+  /programs:
+    get:
+      operationId: program_getPrograms
+      description: Gets a List of Programs
+      parameters:
+        - name: 'id[]'
+          in: query
+          description: The program ID
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+          explode: true
+          style: form
       responses:
-        "200":
+        '200':
           description: List of Programs
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedProgram"
-      parameters:
-        - name: id[]
-          description: The program ID
-          in: query
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
+                $ref: '#/components/schemas/PaginatedProgram'
+      tags:
+        - Program
   /seasons:
     get:
+      operationId: season_getSeasons
       description: Gets a List of Seasons
-      operationId: 'season_getSeasons'
-      tags:
-        - Season
-      responses:
-        "200":
-          description: List of Seasons
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedSeason"
       parameters:
-        - name: id[]
-          description: The Season ID
+        - name: 'id[]'
           in: query
+          description: The Season ID
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
               format: int32
-        - name: program[]
+          explode: true
+          style: form
+        - name: 'program[]'
+          in: query
           description: The Program to which the Season belongs
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
-        - name: team[]
+          explode: true
+          style: form
+        - name: 'team[]'
+          in: query
           description: The seasons in which the specified teams were active
-          in: query
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: integer
+          explode: true
+          style: form
         - name: start
-          description: The Start Date of the Season
           in: query
+          description: The Start Date of the Season
           required: false
           schema:
             type: string
             format: date-time
         - name: end
-          description: The End Date of the Season
           in: query
+          description: The End Date of the Season
           required: false
           schema:
             type: string
             format: date-time
         - name: active
+          in: query
           description: Only include active Seasons
           required: false
-          in: query
           schema:
             type: boolean
-  "/seasons/{id}":
-    get:
-      description: Gets a single Season
-      operationId: 'season_getSeason'
+      responses:
+        '200':
+          description: List of Seasons
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSeason'
       tags:
         - Season
+  '/seasons/{id}':
+    get:
+      operationId: season_getSeason
+      description: Gets a single Season
+      parameters:
+        - name: id
+          in: path
+          description: The Season ID
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
-        "200":
+        '200':
           description: A single Season
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Season"
-      parameters:
-        - name: id
-          description: The Season ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-  "/seasons/{id}/events":
-    get:
-      description: Gets a List of Events for a given Season
-      operationId: 'season_getEvents'
+                $ref: '#/components/schemas/Season'
       tags:
         - Season
-      responses:
-        "200":
-          description: List of Events
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaginatedEvent"
+  '/seasons/{id}/events':
+    get:
+      operationId: season_getEvents
+      description: Gets a List of Events for a given Season
       parameters:
         - name: id
-          description: The Season ID
           in: path
+          description: The Season ID
           required: true
           schema:
             type: integer
             format: int32
-        - name: sku[]
-          description: The Event SKU
+        - name: 'sku[]'
           in: query
+          description: The Event SKU
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
               type: string
-        - name: team[]
-          description: Teams that participated in the Event
-          in: query
-          required: false
-          style: form
           explode: true
+          style: form
+        - name: 'team[]'
+          in: query
+          description: Teams that participated in the Event
+          required: false
           schema:
             type: array
             items:
               type: integer
               format: int32
+          explode: true
+          style: form
         - name: start
-          description: The Start Date of the Event
           in: query
+          description: The Start Date of the Event
           required: false
           schema:
             type: string
             format: date-time
         - name: end
-          description: The End Date of the Event
           in: query
+          description: The End Date of the Event
           required: false
           schema:
             type: string
             format: date-time
-        - name: level[]
-          description: The Event Level
+        - name: 'level[]'
           in: query
+          description: The Event Level
           required: false
-          style: form
-          explode: true
           schema:
             type: array
             items:
@@ -1166,28 +1276,18 @@ paths:
                 - State
                 - Signature
                 - Other
-security:
-  - bearerAuth:
-      []
-info:
-  title: Public Robot Events API
-  version: 1.0.21
-  description: >
-    An API to access data on Robot Events officially.
-
-    ## Request Metadata
-
-    Pagination is performed the same way throughout each pageable endpoint using the query parameters `page` and `per_page`.
-
-    Please not that dates should be formatted according to RFC3339.
-servers:
-  - url: https://www.robotevents.com/api/v2
+          explode: true
+          style: form
+      responses:
+        '200':
+          description: List of Events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEvent'
+      tags:
+        - Season
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
     Event:
       type: object
@@ -1206,27 +1306,27 @@ components:
           type: string
           format: date-time
         season:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         program:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         location:
-          $ref: "#/components/schemas/Location"
+          $ref: '#/components/schemas/Location'
         locations:
           type: array
           items:
-            $ref: "#/components/schemas/Locations"
+            $ref: '#/components/schemas/Locations'
         divisions:
           type: array
           items:
-            $ref: "#/components/schemas/Division"
+            $ref: '#/components/schemas/Division'
         level:
-          $ref: "#/components/schemas/EventLevel"
+          $ref: '#/components/schemas/EventLevel'
         ongoing:
           type: boolean
         awards_finalized:
           type: boolean
         event_type:
-          $ref: "#/components/schemas/EventType"
+          $ref: '#/components/schemas/EventType'
       required:
         - id
         - sku
@@ -1278,7 +1378,7 @@ components:
         country:
           type: string
         coordinates:
-          $ref: "#/components/schemas/Coordinates"
+          $ref: '#/components/schemas/Coordinates'
     Coordinates:
       type: object
       properties:
@@ -1316,35 +1416,34 @@ components:
         id:
           type: integer
           format: int32
-          example: 93452
+          examples:
+            - 93452
         number:
           type: string
-          example: "5327K"
-
+          examples:
+            - 5327K
         team_name:
           type: string
-          example: "The Kreamers"
+          examples:
+            - The Kreamers
         robot_name:
           type: string
         organization:
           type: string
         location:
-          $ref: "#/components/schemas/Location"
+          $ref: '#/components/schemas/Location'
         registered:
           type: boolean
         program:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         grade:
-          $ref: "#/components/schemas/Grade"
+          $ref: '#/components/schemas/Grade'
       required:
         - id
         - number
         - program
     IdInfo:
       type: object
-      required:
-        - id
-        - name
       properties:
         id:
           type: integer
@@ -1352,28 +1451,22 @@ components:
         name:
           type: string
         code:
-          type: string
-          nullable: true
-    MatchObj:
-      type: object
+          type:
+            - string
+            - 'null'
       required:
         - id
-        - event
-        - division
-        - round
-        - instance
-        - matchnum
-        - scored
-        - alliances
         - name
+    MatchObj:
+      type: object
       properties:
         id:
           type: integer
           format: int32
         event:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         division:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         round:
           type: integer
           format: int32
@@ -1398,13 +1491,19 @@ components:
         alliances:
           type: array
           items:
-            $ref: "#/components/schemas/Alliance"
+            $ref: '#/components/schemas/Alliance'
+      required:
+        - id
+        - event
+        - division
+        - round
+        - instance
+        - matchnum
+        - scored
+        - alliances
+        - name
     Alliance:
       type: object
-      required:
-        - color
-        - score
-        - teams
       properties:
         color:
           type: string
@@ -1417,12 +1516,16 @@ components:
         teams:
           type: array
           items:
-            $ref: "#/components/schemas/AllianceTeam"
+            $ref: '#/components/schemas/AllianceTeam'
+      required:
+        - color
+        - score
+        - teams
     AllianceTeam:
       type: object
       properties:
         team:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         sitting:
           type: boolean
     Ranking:
@@ -1432,14 +1535,14 @@ components:
           type: integer
           format: int32
         event:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         division:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         rank:
           type: integer
           format: int32
         team:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         wins:
           type: integer
           format: int32
@@ -1473,15 +1576,15 @@ components:
           type: integer
           format: int32
         event:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         team:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         type:
-          $ref: "#/components/schemas/SkillType"
+          $ref: '#/components/schemas/SkillType'
         season:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         division:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         rank:
           type: integer
           format: int32
@@ -1504,7 +1607,7 @@ components:
           type: integer
           format: int32
         event:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         order:
           type: integer
           format: int32
@@ -1515,18 +1618,26 @@ components:
           items:
             type: string
         designation:
-          type: string
-          enum: ['tournament', 'division']
-          nullable: true
           description: Some awards are given out per tournament or division
+          type:
+            - string
+            - 'null'
+          enum:
+            - tournament
+            - division
         classification:
-          type: string
-          enum: ['champion', 'finalist', 'semifinalist', 'quarterfinalist']
-          nullable: true
+          type:
+            - string
+            - 'null'
+          enum:
+            - champion
+            - finalist
+            - semifinalist
+            - quarterfinalist
         teamWinners:
           type: array
           items:
-            $ref: "#/components/schemas/TeamAwardWinner"
+            $ref: '#/components/schemas/TeamAwardWinner'
         individualWinners:
           type: array
           items:
@@ -1535,9 +1646,9 @@ components:
       type: object
       properties:
         division:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         team:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
     Season:
       type: object
       properties:
@@ -1547,7 +1658,7 @@ components:
         name:
           type: string
         program:
-          $ref: "#/components/schemas/IdInfo"
+          $ref: '#/components/schemas/IdInfo'
         start:
           type: string
           format: date-time
@@ -1597,71 +1708,78 @@ components:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Team"
+            $ref: '#/components/schemas/Team'
     PaginatedEvent:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Event"
+            $ref: '#/components/schemas/Event'
     PaginatedAward:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Award"
+            $ref: '#/components/schemas/Award'
     PaginatedSeason:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Season"
+            $ref: '#/components/schemas/Season'
     PaginatedRanking:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Ranking"
+            $ref: '#/components/schemas/Ranking'
     PaginatedMatch:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/MatchObj"
+            $ref: '#/components/schemas/MatchObj'
     PaginatedSkill:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Skill"
+            $ref: '#/components/schemas/Skill'
     PaginatedProgram:
       type: object
       properties:
         meta:
-          $ref: "#/components/schemas/PageMeta"
+          $ref: '#/components/schemas/PageMeta'
         data:
           type: array
           items:
-            $ref: "#/components/schemas/Program"
+            $ref: '#/components/schemas/Program'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
