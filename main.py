@@ -3,8 +3,8 @@ import typing
 from typing import Dict, List, TextIO
 
 import streamlit as st
-import torch
 import yaml
+from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 from langchain import OpenAI
 from langchain.agents import AgentType, initialize_agent, load_tools
@@ -25,7 +25,6 @@ from langchain.memory import (
 from langchain.requests import Requests, RequestsWrapper
 from langchain.schema import AgentAction, AgentFinish
 from langchain.tools import AIPluginTool, APIOperation, OpenAPISpec
-from transformers import pipeline
 
 load_dotenv()
 
@@ -61,26 +60,48 @@ headers: Dict = {
 requests_wrapper: RequestsWrapper = RequestsWrapper(headers=headers)
 
 with open("assets/RE_documentation.yaml", "r") as file:
-    raw_RE_api_apec: Dict = yaml.load(file, Loader=yaml.Loader)
-    RE_api_spec: ReducedOpenAPISpec = reduce_openapi_spec(raw_RE_api_apec)
+    raw_RE_api_spec: Dict = yaml.load(file, Loader=yaml.Loader)
+    RE_api_spec: ReducedOpenAPISpec = reduce_openapi_spec(raw_RE_api_spec)
 
-robot_events_agent = planner.create_openapi_agent(
-    RE_api_spec,
-    requests_wrapper,
-    current_llm,
-    shared_memory=ConversationBufferMemory(
-        input_key="input", memory_key="buffer_memory"
-    ),
-    verbose=True,
-    handle_parsing_errors=True,
-)
+# Flask server which accepts a query and returns a response
+app = Flask(__name__)
 
-while True:
-    query: str = input("\nEnter a query: ")
+@app.route("/query", methods=["POST"])
+def query():
+    print("Received a query")
+    data = request.get_json()
+    query: str = data.get("query")
 
-    res: str = robot_events_agent.run(query)
+    robot_events_agent = planner.create_openapi_agent(
+        RE_api_spec,
+        requests_wrapper,
+        current_llm,
+        shared_memory=ConversationBufferMemory(
+            input_key="input", memory_key="buffer_memory"
+        ),
+        verbose=True,
+        handle_parsing_errors=True,
+    )
 
-    print("Question:")
-    print(query)
-    print("Answer:")
-    print(res)
+    try:
+        res: str = robot_events_agent.run(query)
+    except ValueError as e:
+        res: str = str(e)
+        if not res.startswith("Could not parse LLM output: `"):
+            raise e
+        res: str = res.removeprefix("Could not parse LLM output: `").removesuffix("`")
+
+    return jsonify({"answer": res})
+
+app.run(host="0.0.0.0", port=5000)
+
+
+# while True:
+#     query: str = input("\nEnter a query: ")
+#
+#     res: str = robot_events_agent.run(query)
+#
+#     print("Question:")
+#     print(query)
+#     print("Answer:")
+#     print(res)
