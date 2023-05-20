@@ -76,9 +76,6 @@ def query():
         RE_api_spec,
         requests_wrapper,
         current_llm,
-        shared_memory=ConversationBufferMemory(
-            input_key="input", memory_key="buffer_memory"
-        ),
         verbose=True,
         handle_parsing_errors=True,
     )
