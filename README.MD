@@ -1,4 +1,4 @@
-# Create models folder containing ggml-gpt4all-j-v1.3-groovy.bin at https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin
+## Server to manage llm queries 
 
 ## ROBOT_EVENTS_API_KEY ##
 
