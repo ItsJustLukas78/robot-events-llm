@@ -2,7 +2,6 @@ import os
 import typing
 from typing import Dict, List, TextIO
 
-import streamlit as st
 import yaml
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
@@ -25,6 +24,7 @@ from langchain.memory import (
 from langchain.requests import Requests, RequestsWrapper
 from langchain.schema import AgentAction, AgentFinish
 from langchain.tools import AIPluginTool, APIOperation, OpenAPISpec
+import llms
 
 load_dotenv()
 
@@ -37,10 +37,12 @@ from langchain.agents.agent_toolkits.openapi import planner
 #     device_map="auto",
 #     return_full_text=True,
 # )
-
+#
 openai_llm: ChatOpenAI = ChatOpenAI(
     temperature=0.2, model_name="gpt-3.5-turbo", verbose=True
 )
+
+# openai_pyllms_model = llms.init(openai_api_key=os.getenv("OPENAI_API_KEY"), model='gpt-3.5-turbo')
 
 # gpt4all_model = GPT4All(
 #     model="./models/ggml-gpt4all-j-v1.3-groovy.bin",
